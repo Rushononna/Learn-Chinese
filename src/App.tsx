@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor, useDraggable, useDroppable } from '@dnd-kit/core';
-import { Check, X, RotateCcw, Box, CloudSun, Briefcase, Type, Image as ImageIcon } from 'lucide-react';
+import { Check, X, RotateCcw, Box, CloudSun, Briefcase, MapPin, Type, Image as ImageIcon } from 'lucide-react';
 
 type Word = {
   id: string;
@@ -31,7 +31,21 @@ const SpatialIcon = ({ type }: { type: string }) => (
     {type === 'on' && <circle cx="50" cy="25" r="15" fill="#ef4444" />}
     {type === 'under' && <circle cx="50" cy="95" r="15" fill="#ef4444" />}
     {type === 'front' && <circle cx="50" cy="65" r="18" fill="#ef4444" />}
-    {type === 'beside' && <circle cx="10" cy="60" r="15" fill="#ef4444" />}
+    {type === 'beside' && (
+      <>
+        <circle cx="10" cy="60" r="12" fill="#ef4444" />
+        <circle cx="90" cy="60" r="12" fill="#ef4444" />
+      </>
+    )}
+    {type === 'left' && <circle cx="10" cy="60" r="15" fill="#ef4444" />}
+    {type === 'right' && <circle cx="90" cy="60" r="15" fill="#ef4444" />}
+    {type === 'outside' && <circle cx="85" cy="15" r="15" fill="#ef4444" />}
+    {type === 'nearby' && (
+      <>
+        <circle cx="85" cy="85" r="10" fill="#ef4444" />
+        <circle cx="85" cy="85" r="18" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="4 4" />
+      </>
+    )}
   </svg>
 );
 
@@ -47,6 +61,10 @@ const CATEGORIES: Record<string, Category> = {
       { id: 'front', chinese: '前面', pinyin: 'qián miàn', english: 'in front of', color: 'bg-emerald-500', visual: <SpatialIcon type="front" /> },
       { id: 'under', chinese: '下面', pinyin: 'xià miàn', english: 'under / below', color: 'bg-blue-600', visual: <SpatialIcon type="under" /> },
       { id: 'beside', chinese: '旁边', pinyin: 'páng biān', english: 'next to / beside', color: 'bg-purple-500', visual: <SpatialIcon type="beside" /> },
+      { id: 'left', chinese: '左面', pinyin: 'zuǒ miàn', english: 'left side', color: 'bg-pink-500', visual: <SpatialIcon type="left" /> },
+      { id: 'right', chinese: '右面', pinyin: 'yòu miàn', english: 'right side', color: 'bg-indigo-500', visual: <SpatialIcon type="right" /> },
+      { id: 'outside', chinese: '外面', pinyin: 'wài miàn', english: 'outside', color: 'bg-yellow-600', visual: <SpatialIcon type="outside" /> },
+      { id: 'nearby', chinese: '附近', pinyin: 'fù jìn', english: 'nearby', color: 'bg-teal-600', visual: <SpatialIcon type="nearby" /> },
     ]
   },
   weather: {
@@ -67,12 +85,34 @@ const CATEGORIES: Record<string, Category> = {
     title: 'Common Jobs',
     icon: Briefcase,
     words: [
-      { id: 'teacher', chinese: '老师', pinyin: 'lǎo shī', english: 'teacher', color: 'bg-emerald-500', visual: <span className="text-4xl sm:text-5xl">👨‍🏫</span> },
       { id: 'doctor', chinese: '医生', pinyin: 'yī shēng', english: 'doctor', color: 'bg-blue-500', visual: <span className="text-4xl sm:text-5xl">👨‍⚕️</span> },
+      { id: 'nurse', chinese: '护士', pinyin: 'hù shì', english: 'nurse', color: 'bg-pink-500', visual: <span className="text-4xl sm:text-5xl">👩‍⚕️</span> },
+      { id: 'employee', chinese: '员工', pinyin: 'yuán gōng', english: 'employee', color: 'bg-slate-500', visual: <span className="text-4xl sm:text-5xl">🧑‍💼</span> },
+      { id: 'teacher', chinese: '老师', pinyin: 'lǎo shī', english: 'teacher', color: 'bg-emerald-500', visual: <span className="text-4xl sm:text-5xl">👨‍🏫</span> },
+      { id: 'student', chinese: '学生', pinyin: 'xué shēng', english: 'student', color: 'bg-amber-500', visual: <span className="text-4xl sm:text-5xl">👨‍🎓</span> },
+      { id: 'boss', chinese: '老板', pinyin: 'lǎo bǎn', english: 'boss', color: 'bg-purple-600', visual: <span className="text-4xl sm:text-5xl">👔</span> },
       { id: 'police', chinese: '警察', pinyin: 'jǐng chá', english: 'police', color: 'bg-indigo-600', visual: <span className="text-4xl sm:text-5xl">👮</span> },
-      { id: 'chef', chinese: '厨师', pinyin: 'chú shī', english: 'chef', color: 'bg-orange-500', visual: <span className="text-4xl sm:text-5xl">👨‍🍳</span> },
-      { id: 'driver', chinese: '司机', pinyin: 'sī jī', english: 'driver', color: 'bg-yellow-500', visual: <span className="text-4xl sm:text-5xl">🚌</span> },
-      { id: 'worker', chinese: '工人', pinyin: 'gōng rén', english: 'worker', color: 'bg-stone-500', visual: <span className="text-4xl sm:text-5xl">👷</span> },
+      { id: 'lawyer', chinese: '律师', pinyin: 'lǜ shī', english: 'lawyer', color: 'bg-stone-600', visual: <span className="text-4xl sm:text-5xl">⚖️</span> },
+    ]
+  },
+  locations: {
+    id: 'locations',
+    title: 'Locations',
+    icon: MapPin,
+    words: [
+      { id: 'train_station', chinese: '火车站', pinyin: 'huǒ chē zhàn', english: 'train station', color: 'bg-orange-500', visual: <span className="text-4xl sm:text-5xl">🚉</span> },
+      { id: 'bus_station', chinese: '汽车站', pinyin: 'qì chē zhàn', english: 'bus station', color: 'bg-yellow-500', visual: <span className="text-4xl sm:text-5xl">🚌</span> },
+      { id: 'airport', chinese: '飞机场', pinyin: 'fēi jī chǎng', english: 'airport', color: 'bg-sky-500', visual: <span className="text-4xl sm:text-5xl">✈️</span> },
+      { id: 'store', chinese: '商店', pinyin: 'shāng diàn', english: 'store', color: 'bg-rose-500', visual: <span className="text-4xl sm:text-5xl">🏪</span> },
+      { id: 'home', chinese: '家', pinyin: 'jiā', english: 'home', color: 'bg-teal-500', visual: <span className="text-4xl sm:text-5xl">🏠</span> },
+      { id: 'school', chinese: '学校', pinyin: 'xué xiào', english: 'school', color: 'bg-emerald-500', visual: <span className="text-4xl sm:text-5xl">🏫</span> },
+      { id: 'company', chinese: '公司', pinyin: 'gōng sī', english: 'company', color: 'bg-slate-600', visual: <span className="text-4xl sm:text-5xl">🏢</span> },
+      { id: 'hospital', chinese: '医院', pinyin: 'yī yuàn', english: 'hospital', color: 'bg-red-500', visual: <span className="text-4xl sm:text-5xl">🏥</span> },
+      { id: 'post_office', chinese: '邮局', pinyin: 'yóu jú', english: 'post office', color: 'bg-green-600', visual: <span className="text-4xl sm:text-5xl">🏣</span> },
+      { id: 'bank', chinese: '银行', pinyin: 'yín háng', english: 'bank', color: 'bg-blue-600', visual: <span className="text-4xl sm:text-5xl">🏦</span> },
+      { id: 'subway', chinese: '地铁站', pinyin: 'dì tiě zhàn', english: 'subway station', color: 'bg-indigo-500', visual: <span className="text-4xl sm:text-5xl">🚇</span> },
+      { id: 'library', chinese: '图书馆', pinyin: 'tú shū guǎn', english: 'library', color: 'bg-amber-600', visual: <span className="text-4xl sm:text-5xl">📚</span> },
+      { id: 'park', chinese: '公园', pinyin: 'gōng yuán', english: 'park', color: 'bg-lime-600', visual: <span className="text-4xl sm:text-5xl">🏞️</span> },
     ]
   }
 };
@@ -129,8 +169,8 @@ const WordCard = ({ word, isOverlay = false }: { word: Word, isOverlay?: boolean
   <div 
     className={`w-24 h-16 sm:w-28 sm:h-20 rounded-lg shadow-sm flex flex-col items-center justify-center text-white cursor-grab active:cursor-grabbing select-none transition-shadow ${word.color} ${isOverlay ? 'shadow-xl scale-105 rotate-2' : 'hover:shadow-md'}`}
   >
-    <span className="text-xl sm:text-2xl font-bold mb-1 tracking-wider">{word.chinese}</span>
-    <span className="text-xs sm:text-sm font-medium opacity-90">{word.pinyin}</span>
+    <span className="text-lg sm:text-xl font-bold mb-1 tracking-wide px-1 text-center leading-tight">{word.chinese}</span>
+    <span className="text-[10px] sm:text-xs font-medium opacity-90 px-1 text-center leading-tight">{word.pinyin}</span>
   </div>
 );
 
